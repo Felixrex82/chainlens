@@ -1699,7 +1699,7 @@ animateLoadingSteps(async () => {
     const chainSelect = document.getElementById('chain-select').value;
 
     // Try backend API first
-    const response = await fetch('http://localhost:5000/api/contracts/analyze', {
+    const response = await fetch('https://chainlens-backend-production-656c.up.railway.app/api/contracts/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
