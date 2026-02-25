@@ -1,1865 +1,1292 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ChainLens — Smart Contract Risk Intelligence</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #080B0F;
-    --bg2: #0D1117;
-    --bg3: #111820;
-    --surface: #141C26;
-    --surface2: #1A2433;
-    --border: #1E2D3D;
-    --border2: #243444;
-    --accent: #00D4FF;
-    --accent2: #0099CC;
-    --accent-glow: rgba(0, 212, 255, 0.15);
-    --green: #00FF88;
-    --green-dim: rgba(0, 255, 136, 0.12);
-    --red: #FF4466;
-    --red-dim: rgba(255, 68, 102, 0.12);
-    --yellow: #FFB800;
-    --yellow-dim: rgba(255, 184, 0, 0.12);
-    --text: #E8EDF2;
-    --text2: #8A9BAE;
-    --text3: #4A5A6A;
-    --mono: 'Space Mono', monospace;
-    --sans: 'Syne', sans-serif;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Animated grid background */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* Radial glow */
-  body::after {
-    content: '';
-    position: fixed;
-    top: -30%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 800px;
-    height: 600px;
-    background: radial-gradient(ellipse, rgba(0,212,255,0.06) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* NAV */
-  nav {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 40px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(8,11,15,0.85);
-    backdrop-filter: blur(20px);
-  }
-
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-family: var(--sans);
-    font-weight: 800;
-    font-size: 20px;
-    color: var(--text);
-    text-decoration: none;
-  }
-
-  .logo-icon {
-    width: 32px;
-    height: 32px;
-    background: var(--accent);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    box-shadow: 0 0 20px rgba(0,212,255,0.4);
-  }
-
-  .logo span { color: var(--accent); }
-
-  .nav-links {
-    display: flex;
-    align-items: center;
-    gap: 32px;
-    list-style: none;
-  }
-
-  .nav-links a {
-    color: var(--text2);
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    transition: color 0.2s;
-    letter-spacing: 0.02em;
-  }
-
-  .nav-links a:hover { color: var(--accent); }
-
-  .nav-cta {
-    background: var(--accent);
-    color: var(--bg) !important;
-    padding: 8px 20px;
-    border-radius: 6px;
-    font-weight: 700 !important;
-    transition: box-shadow 0.2s, transform 0.2s !important;
-  }
-
-  .nav-cta:hover {
-    box-shadow: 0 0 20px rgba(0,212,255,0.4) !important;
-    transform: translateY(-1px);
-  }
-
-  /* HERO */
-  .hero {
-    position: relative;
-    z-index: 1;
-    text-align: center;
-    padding: 100px 40px 60px;
-    max-width: 900px;
-    margin: 0 auto;
-  }
-
-  .hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--surface);
-    border: 1px solid var(--border2);
-    border-radius: 100px;
-    padding: 6px 16px;
-    font-size: 12px;
-    font-family: var(--mono);
-    color: var(--accent);
-    margin-bottom: 32px;
-    letter-spacing: 0.05em;
-  }
-
-  .badge-dot {
-    width: 6px;
-    height: 6px;
-    background: var(--green);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,255,136,0.4); }
-    50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(0,255,136,0); }
-  }
-
-  .hero h1 {
-    font-size: clamp(42px, 7vw, 80px);
-    font-weight: 800;
-    line-height: 1.05;
-    letter-spacing: -0.03em;
-    margin-bottom: 24px;
-  }
-
-  .hero h1 .line2 { color: var(--accent); }
-
-  .hero p {
-    font-size: 18px;
-    color: var(--text2);
-    line-height: 1.7;
-    max-width: 600px;
-    margin: 0 auto 48px;
-    font-weight: 400;
-  }
-
-  /* STATS BAR */
-  .stats-bar {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    justify-content: center;
-    gap: 0;
-    max-width: 800px;
-    margin: 0 auto 80px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    background: var(--surface);
-  }
-
-  .stat-item {
-    flex: 1;
-    padding: 24px;
-    text-align: center;
-    border-right: 1px solid var(--border);
-  }
-
-  .stat-item:last-child { border-right: none; }
-
-  .stat-value {
-    font-size: 28px;
-    font-weight: 800;
-    color: var(--text);
-    margin-bottom: 4px;
-    font-family: var(--mono);
-  }
-
-  .stat-value.danger { color: var(--red); }
-  .stat-value.safe { color: var(--green); }
-  .stat-value.warn { color: var(--yellow); }
-
-  .stat-label {
-    font-size: 12px;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-
-  /* MAIN APP SECTION */
-  .app-section {
-    position: relative;
-    z-index: 1;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 40px 100px;
-  }
-
-  .section-label {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    margin-bottom: 12px;
-  }
-
-  .section-title {
-    font-size: 32px;
-    font-weight: 800;
-    margin-bottom: 32px;
-    letter-spacing: -0.02em;
-  }
-
-  /* INPUT PANEL */
-  .input-panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-    margin-bottom: 40px;
-  }
-
-  .panel-tabs {
-    display: flex;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg2);
-  }
-
-  .tab-btn {
-    padding: 14px 24px;
-    background: none;
-    border: none;
-    color: var(--text3);
-    font-family: var(--sans);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-    letter-spacing: 0.02em;
-  }
-
-  .tab-btn.active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-  }
-
-  .tab-btn:hover:not(.active) { color: var(--text2); }
-
-  .tab-content { display: none; padding: 24px; }
-  .tab-content.active { display: block; }
-
-  .input-group {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    margin-bottom: 16px;
-  }
-
-  .chain-select {
-    background: var(--bg3);
-    border: 1px solid var(--border2);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 13px;
-    padding: 14px 16px;
-    cursor: pointer;
-    outline: none;
-    min-width: 130px;
-    transition: border-color 0.2s;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234A5A6A' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 32px;
-  }
-
-  .chain-select option { background: var(--bg2); }
-  .chain-select:focus { border-color: var(--accent); }
-
-  .address-input {
-    flex: 1;
-    background: var(--bg3);
-    border: 1px solid var(--border2);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 13px;
-    padding: 14px 16px;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-
-  .address-input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-glow);
-  }
-
-  .address-input::placeholder { color: var(--text3); }
-
-  .analyze-btn {
-    background: var(--accent);
-    color: var(--bg);
-    border: none;
-    border-radius: 8px;
-    padding: 14px 28px;
-    font-family: var(--sans);
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-    letter-spacing: 0.02em;
-  }
-
-  .analyze-btn:hover {
-    box-shadow: 0 0 24px rgba(0,212,255,0.35);
-    transform: translateY(-1px);
-  }
-
-  .analyze-btn:active { transform: translateY(0); }
-  .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-  .code-input {
-    width: 100%;
-    background: var(--bg3);
-    border: 1px solid var(--border2);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 12px;
-    padding: 16px;
-    outline: none;
-    resize: vertical;
-    min-height: 160px;
-    line-height: 1.6;
-    transition: border-color 0.2s;
-    margin-bottom: 12px;
-  }
-
-  .code-input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-glow);
-  }
-
-  .code-input::placeholder { color: var(--text3); }
-
-  .input-hint {
-    font-size: 12px;
-    color: var(--text3);
-    font-family: var(--mono);
-  }
-
-  .quick-samples {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 12px;
-  }
-
-  .sample-chip {
-    background: var(--bg3);
-    border: 1px solid var(--border2);
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 11px;
-    font-family: var(--mono);
-    color: var(--text2);
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .sample-chip:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-glow);
-  }
-
-  /* LOADING STATE */
-  .loading-panel {
-    display: none;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 48px;
-    text-align: center;
-    margin-bottom: 40px;
-  }
-
-  .loading-panel.visible { display: block; }
-
-  .scan-animation {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 24px;
-    position: relative;
-  }
-
-  .scan-ring {
-    position: absolute;
-    inset: 0;
-    border: 2px solid var(--border2);
-    border-radius: 50%;
-  }
-
-  .scan-ring::after {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border: 2px solid transparent;
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .scan-icon {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-  }
-
-  .loading-steps {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    max-width: 320px;
-    margin: 0 auto;
-    text-align: left;
-  }
-
-  .loading-step {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-family: var(--mono);
-    color: var(--text3);
-    background: var(--bg2);
-    transition: all 0.4s;
-  }
-
-  .loading-step.active {
-    color: var(--accent);
-    background: var(--accent-glow);
-    border: 1px solid rgba(0,212,255,0.2);
-  }
-
-  .loading-step.done { color: var(--green); }
-  .step-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
-
-  /* REPORT PANEL */
-  .report-panel {
-    display: none;
-  }
-
-  .report-panel.visible { display: block; }
-
-  /* Risk Score Header */
-  .risk-header {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 32px;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    gap: 32px;
-  }
-
-  .risk-score-ring {
-    position: relative;
-    width: 120px;
-    height: 120px;
-    flex-shrink: 0;
-  }
-
-  .risk-score-ring svg {
-    transform: rotate(-90deg);
-    width: 120px;
-    height: 120px;
-  }
-
-  .risk-score-ring .ring-bg {
-    fill: none;
-    stroke: var(--border2);
-    stroke-width: 8;
-  }
-
-  .risk-score-ring .ring-fill {
-    fill: none;
-    stroke-width: 8;
-    stroke-linecap: round;
-    transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-    stroke-dasharray: 339.29;
-    stroke-dashoffset: 339.29;
-  }
-
-  .risk-score-value {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--mono);
-  }
-
-  .score-num {
-    font-size: 32px;
-    font-weight: 700;
-    line-height: 1;
-  }
-
-  .score-label {
-    font-size: 10px;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-top: 2px;
-  }
-
-  .risk-header-info { flex: 1; }
-
-  .contract-name {
-    font-size: 24px;
-    font-weight: 800;
-    margin-bottom: 6px;
-    letter-spacing: -0.02em;
-  }
-
-  .contract-address {
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--text3);
-    margin-bottom: 16px;
-  }
-
-  .risk-verdict {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-  }
-
-  .risk-verdict.low { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,255,136,0.2); }
-  .risk-verdict.medium { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(255,184,0,0.2); }
-  .risk-verdict.high { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,68,102,0.2); }
-  .risk-verdict.critical { background: rgba(255,0,50,0.15); color: #FF0033; border: 1px solid rgba(255,0,50,0.3); }
-
-  .risk-header-meta {
-    display: flex;
-    gap: 24px;
-    margin-top: 16px;
-  }
-
-  .meta-item { font-size: 12px; color: var(--text3); font-family: var(--mono); }
-  .meta-item span { color: var(--text2); }
-
-  /* Findings Grid */
-  .findings-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 24px;
-  }
-
-  .finding-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    transition: border-color 0.2s;
-  }
-
-  .finding-card:hover { border-color: var(--border2); }
-
-  .finding-card.danger {
-    border-color: rgba(255,68,102,0.3);
-    background: linear-gradient(135deg, var(--surface) 0%, rgba(255,68,102,0.05) 100%);
-  }
-
-  .finding-card.warning {
-    border-color: rgba(255,184,0,0.3);
-    background: linear-gradient(135deg, var(--surface) 0%, rgba(255,184,0,0.05) 100%);
-  }
-
-  .finding-card.safe {
-    border-color: rgba(0,255,136,0.2);
-    background: linear-gradient(135deg, var(--surface) 0%, rgba(0,255,136,0.04) 100%);
-  }
-
-  .finding-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 12px;
-  }
-
-  .finding-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-  }
-
-  .finding-icon.danger { background: var(--red-dim); }
-  .finding-icon.warning { background: var(--yellow-dim); }
-  .finding-icon.safe { background: var(--green-dim); }
-
-  .finding-title {
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-  }
-
-  .finding-severity {
-    margin-left: auto;
-    font-size: 10px;
-    font-family: var(--mono);
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  .finding-severity.danger { color: var(--red); }
-  .finding-severity.warning { color: var(--yellow); }
-  .finding-severity.safe { color: var(--green); }
-
-  .finding-desc {
-    font-size: 13px;
-    color: var(--text2);
-    line-height: 1.6;
-    margin-bottom: 12px;
-  }
-
-  .finding-code {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 10px 12px;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text3);
-    line-height: 1.5;
-    overflow-x: auto;
-  }
-
-  .finding-code .highlight { color: var(--red); }
-  .finding-code .safe-highlight { color: var(--green); }
-
-  /* Detailed Analysis Sections */
-  .analysis-sections {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    margin-bottom: 24px;
-  }
-
-  .analysis-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-
-  .analysis-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg2);
-    cursor: pointer;
-  }
-
-  .analysis-card-header h3 {
-    font-size: 14px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .analysis-card-body { padding: 20px; }
-
-  /* Tokenomics Table */
-  .token-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  .token-table tr {
-    border-bottom: 1px solid var(--border);
-  }
-
-  .token-table tr:last-child { border-bottom: none; }
-
-  .token-table td {
-    padding: 12px 0;
-    font-size: 13px;
-  }
-
-  .token-table td:first-child {
-    color: var(--text3);
-    font-family: var(--mono);
-    font-size: 12px;
-    width: 40%;
-  }
-
-  .token-table td:last-child {
-    color: var(--text);
-    font-weight: 600;
-    text-align: right;
-  }
-
-  .token-table .flag { color: var(--red); }
-  .token-table .ok { color: var(--green); }
-  .token-table .warn { color: var(--yellow); }
-
-  /* Ownership Chart */
-  .ownership-bars { display: flex; flex-direction: column; gap: 10px; }
-
-  .ownership-bar-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 12px;
-  }
-
-  .ownership-label {
-    width: 120px;
-    color: var(--text3);
-    font-family: var(--mono);
-    font-size: 11px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .ownership-bar-track {
-    flex: 1;
-    height: 8px;
-    background: var(--bg3);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-
-  .ownership-bar-fill {
-    height: 100%;
-    border-radius: 4px;
-    transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
-    width: 0;
-  }
-
-  .ownership-pct {
-    width: 40px;
-    text-align: right;
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--text2);
-  }
-
-  /* Verdict Footer */
-  .verdict-footer {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 24px;
-    margin-bottom: 24px;
-  }
-
-  .verdict-footer h3 {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .verdict-text {
-    font-size: 14px;
-    color: var(--text2);
-    line-height: 1.7;
-    margin-bottom: 20px;
-  }
-
-  .verdict-actions {
-    display: flex;
-    gap: 12px;
-  }
-
-  .verdict-btn {
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    border: none;
-    font-family: var(--sans);
-    transition: all 0.2s;
-    letter-spacing: 0.02em;
-  }
-
-  .verdict-btn.primary {
-    background: var(--accent);
-    color: var(--bg);
-  }
-
-  .verdict-btn.primary:hover { box-shadow: 0 0 20px rgba(0,212,255,0.3); }
-
-  .verdict-btn.secondary {
-    background: var(--bg2);
-    color: var(--text2);
-    border: 1px solid var(--border2);
-  }
-
-  .verdict-btn.secondary:hover { color: var(--text); border-color: var(--accent); }
-
-  /* FEATURES SECTION */
-  .features-section {
-    position: relative;
-    z-index: 1;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 80px 40px;
-    border-top: 1px solid var(--border);
-  }
-
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    margin-top: 48px;
-  }
-
-  .feature-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 28px;
-    transition: border-color 0.2s, transform 0.2s;
-  }
-
-  .feature-card:hover {
-    border-color: var(--border2);
-    transform: translateY(-2px);
-  }
-
-  .feature-icon {
-    font-size: 28px;
-    margin-bottom: 16px;
-  }
-
-  .feature-card h3 {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    letter-spacing: -0.01em;
-  }
-
-  .feature-card p {
-    font-size: 13px;
-    color: var(--text2);
-    line-height: 1.6;
-  }
-
-  /* PRICING */
-  .pricing-section {
-    position: relative;
-    z-index: 1;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 80px 40px;
-    border-top: 1px solid var(--border);
-  }
-
-  .pricing-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    margin-top: 48px;
-  }
-
-  .pricing-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 32px;
-    transition: border-color 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .pricing-card.featured {
-    border-color: var(--accent);
-    background: linear-gradient(135deg, var(--surface) 0%, rgba(0,212,255,0.05) 100%);
-  }
-
-  .pricing-card.featured::before {
-    content: 'MOST POPULAR';
-    position: absolute;
-    top: 16px;
-    right: -24px;
-    background: var(--accent);
-    color: var(--bg);
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    padding: 4px 32px;
-    transform: rotate(30deg);
-  }
-
-  .pricing-tier {
-    font-size: 11px;
-    font-family: var(--mono);
-    color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    margin-bottom: 16px;
-  }
-
-  .pricing-price {
-    font-size: 40px;
-    font-weight: 800;
-    font-family: var(--mono);
-    margin-bottom: 4px;
-  }
-
-  .pricing-period {
-    font-size: 12px;
-    color: var(--text3);
-    margin-bottom: 24px;
-  }
-
-  .pricing-features {
-    list-style: none;
-    margin-bottom: 32px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .pricing-features li {
-    font-size: 13px;
-    color: var(--text2);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .pricing-features li::before {
-    content: '→';
-    color: var(--accent);
-    font-family: var(--mono);
-    font-size: 12px;
-  }
-
-  .pricing-btn {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    border: none;
-    font-family: var(--sans);
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 0.02em;
-  }
-
-  .pricing-btn.ghost {
-    background: transparent;
-    color: var(--text2);
-    border: 1px solid var(--border2);
-  }
-
-  .pricing-btn.ghost:hover { border-color: var(--accent); color: var(--accent); }
-
-  .pricing-btn.primary-btn {
-    background: var(--accent);
-    color: var(--bg);
-  }
-
-  .pricing-btn.primary-btn:hover { box-shadow: 0 0 20px rgba(0,212,255,0.3); }
-
-  /* FOOTER */
-  footer {
-    position: relative;
-    z-index: 1;
-    border-top: 1px solid var(--border);
-    padding: 40px;
-    max-width: 1100px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  footer p {
-    font-size: 12px;
-    color: var(--text3);
-    font-family: var(--mono);
-  }
-
-  footer a { color: var(--text3); text-decoration: none; }
-  footer a:hover { color: var(--accent); }
-
-  /* SCROLL ANIMATIONS */
-  .fade-up {
-    opacity: 0;
-    transform: translateY(24px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
-  }
-
-  .fade-up.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    nav { padding: 16px 20px; }
-    .nav-links { display: none; }
-    .hero { padding: 60px 20px 40px; }
-    .hero h1 { font-size: 36px; }
-    .stats-bar { flex-direction: column; margin: 0 20px 60px; }
-    .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
-    .stat-item:last-child { border-bottom: none; }
-    .app-section { padding: 0 20px 60px; }
-    .findings-grid { grid-template-columns: 1fr; }
-    .risk-header { flex-direction: column; text-align: center; gap: 20px; }
-    .risk-header-meta { justify-content: center; flex-wrap: wrap; }
-    .features-grid, .pricing-grid { grid-template-columns: 1fr; }
-    .features-section, .pricing-section { padding: 60px 20px; }
-    footer { flex-direction: column; gap: 16px; text-align: center; padding: 40px 20px; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RugRadar - Instant Solana Token Scanner | Pump.fun Rug Detection</title>
+  <meta name="description" content="Scan Solana tokens in 3 seconds. AI-powered rug detection for pump.fun and Raydium. Never get rugged again.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0A0118;
+      --bg2: #150426;
+      --bg3: #1F0838;
+      --purple: #9333EA;
+      --purple-light: #A855F7;
+      --neon: #00FF88;
+      --neon-glow: rgba(0, 255, 136, 0.3);
+      --red: #FF4466;
+      --red-glow: rgba(255, 68, 102, 0.3);
+      --yellow: #FFB800;
+      --text: #F8FAFC;
+      --text2: #CBD5E1;
+      --text3: #94A3B8;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Space Grotesk', -apple-system, sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Animated background grid */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(147, 51, 234, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(147, 51, 234, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      z-index: -1;
+      animation: gridMove 20s linear infinite;
+    }
+
+    @keyframes gridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+
+    /* Radial glow effects */
+    .glow-purple {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(147, 51, 234, 0.15), transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .glow-1 { top: -200px; left: -200px; }
+    .glow-2 { bottom: -200px; right: -200px; }
+
+    /* Nav */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 1, 24, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(147, 51, 234, 0.2);
+      padding: 16px 0;
+    }
+
+    .nav-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--neon);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-shadow: 0 0 20px var(--neon-glow);
+    }
+
+    .logo-icon {
+      font-size: 28px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--text2);
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--neon);
+    }
+
+    .connect-wallet {
+      background: linear-gradient(135deg, var(--purple), var(--purple-light));
+      color: white;
+      padding: 10px 24px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--sans);
+      font-size: 14px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 0 20px rgba(147, 51, 234, 0.3);
+    }
+
+    .connect-wallet:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(147, 51, 234, 0.5);
+    }
+
+    /* Hero */
+    .hero {
+      max-width: 1400px;
+      margin: 80px auto 40px;
+      padding: 0 24px;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 64px;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, var(--neon), var(--purple-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 20px;
+      color: var(--text2);
+      max-width: 600px;
+      margin: 0 auto 40px;
+    }
+
+    .stats-bar {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      margin-top: 40px;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--neon);
+      font-family: var(--mono);
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    /* Scanner Section */
+    .scanner-section {
+      max-width: 900px;
+      margin: 60px auto;
+      padding: 0 24px;
+    }
+
+    .scanner-card {
+      background: var(--bg2);
+      border: 1px solid rgba(147, 51, 234, 0.3);
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .input-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text2);
+      margin-bottom: 12px;
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .address-input {
+      flex: 1;
+      background: var(--bg);
+      border: 2px solid rgba(147, 51, 234, 0.3);
+      border-radius: 8px;
+      padding: 16px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 14px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .address-input:focus {
+      outline: none;
+      border-color: var(--purple);
+      box-shadow: 0 0 20px rgba(147, 51, 234, 0.2);
+    }
+
+    .scan-btn {
+      background: linear-gradient(135deg, var(--neon), #00D4AA);
+      color: var(--bg);
+      padding: 16px 48px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 16px;
+      font-family: var(--sans);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px var(--neon-glow);
+      white-space: nowrap;
+    }
+
+    .scan-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 30px var(--neon-glow);
+    }
+
+    .scan-btn:active {
+      transform: translateY(0);
+    }
+
+    .quick-samples {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .sample-chip {
+      background: var(--bg3);
+      border: 1px solid rgba(147, 51, 234, 0.4);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      color: var(--text2);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .sample-chip:hover {
+      background: var(--purple);
+      color: white;
+      border-color: var(--purple);
+      transform: translateY(-1px);
+    }
+
+    /* Loading */
+    .loading-panel {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 24px;
+      opacity: 0;
+      display: none;
+      transition: opacity 0.3s;
+    }
+
+    .loading-panel.visible {
+      display: block;
+      opacity: 1;
+    }
+
+    .loading-content {
+      background: var(--bg2);
+      border: 1px solid rgba(147, 51, 234, 0.3);
+      border-radius: 16px;
+      padding: 48px;
+      text-align: center;
+    }
+
+    .loading-spinner {
+      width: 80px;
+      height: 80px;
+      border: 4px solid rgba(147, 51, 234, 0.2);
+      border-top: 4px solid var(--neon);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 24px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-steps {
+      margin-top: 32px;
+      text-align: left;
+    }
+
+    .loading-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      color: var(--text3);
+      font-size: 14px;
+    }
+
+    .loading-step.active {
+      color: var(--neon);
+    }
+
+    .loading-step.done {
+      color: var(--text2);
+    }
+
+    .step-icon {
+      width: 24px;
+      height: 24px;
+      border: 2px solid currentColor;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .loading-step.done .step-icon {
+      background: var(--neon);
+      border-color: var(--neon);
+      color: var(--bg);
+    }
+
+    /* Report */
+    .report-panel {
+      max-width: 1200px;
+      margin: 40px auto 80px;
+      padding: 0 24px;
+      opacity: 0;
+      display: none;
+      transition: opacity 0.3s;
+    }
+
+    .report-panel.visible {
+      display: block;
+      opacity: 1;
+      animation: slideUp 0.4s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .report-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .contract-info {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text3);
+      margin-bottom: 16px;
+    }
+
+    .contract-name {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    /* Risk Score Ring */
+    .risk-score-container {
+      display: flex;
+      justify-content: center;
+      margin: 40px 0;
+    }
+
+    .risk-ring {
+      position: relative;
+      width: 220px;
+      height: 220px;
+    }
+
+    .ring-svg {
+      transform: rotate(-90deg);
+      width: 100%;
+      height: 100%;
+    }
+
+    .ring-circle {
+      fill: none;
+      stroke-width: 12;
+      stroke: rgba(147, 51, 234, 0.2);
+    }
+
+    .ring-progress {
+      fill: none;
+      stroke-width: 12;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .ring-progress.low { stroke: var(--neon); filter: drop-shadow(0 0 8px var(--neon)); }
+    .ring-progress.medium { stroke: var(--yellow); filter: drop-shadow(0 0 8px var(--yellow)); }
+    .ring-progress.high { stroke: var(--red); filter: drop-shadow(0 0 8px var(--red)); }
+    .ring-progress.critical { stroke: var(--red); filter: drop-shadow(0 0 12px var(--red)); }
+
+    .ring-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .risk-score-number {
+      font-size: 56px;
+      font-weight: 700;
+      font-family: var(--mono);
+      line-height: 1;
+    }
+
+    .risk-score-number.low { color: var(--neon); }
+    .risk-score-number.medium { color: var(--yellow); }
+    .risk-score-number.high { color: var(--red); }
+    .risk-score-number.critical { color: var(--red); }
+
+    .risk-score-label {
+      font-size: 12px;
+      color: var(--text3);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .verdict-badge {
+      display: inline-block;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .verdict-badge.low { background: rgba(0, 255, 136, 0.2); color: var(--neon); border: 1px solid var(--neon); }
+    .verdict-badge.medium { background: rgba(255, 184, 0, 0.2); color: var(--yellow); border: 1px solid var(--yellow); }
+    .verdict-badge.high { background: rgba(255, 68, 102, 0.2); color: var(--red); border: 1px solid var(--red); }
+    .verdict-badge.critical { background: rgba(255, 68, 102, 0.3); color: var(--red); border: 2px solid var(--red); animation: pulse-border 2s infinite; }
+
+    @keyframes pulse-border {
+      0%, 100% { box-shadow: 0 0 20px rgba(255, 68, 102, 0.4); }
+      50% { box-shadow: 0 0 40px rgba(255, 68, 102, 0.6); }
+    }
+
+    /* Findings Grid */
+    .findings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+      margin: 40px 0;
+    }
+
+    .finding-card {
+      background: var(--bg2);
+      border: 1px solid rgba(147, 51, 234, 0.3);
+      border-radius: 12px;
+      padding: 24px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .finding-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .finding-card.danger {
+      border-color: rgba(255, 68, 102, 0.5);
+      background: linear-gradient(135deg, var(--bg2), rgba(255, 68, 102, 0.05));
+    }
+
+    .finding-card.warning {
+      border-color: rgba(255, 184, 0, 0.5);
+      background: linear-gradient(135deg, var(--bg2), rgba(255, 184, 0, 0.05));
+    }
+
+    .finding-card.safe {
+      border-color: rgba(0, 255, 136, 0.5);
+      background: linear-gradient(135deg, var(--bg2), rgba(0, 255, 136, 0.05));
+    }
+
+    .finding-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .finding-icon {
+      font-size: 24px;
+    }
+
+    .finding-title {
+      font-size: 16px;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .severity-badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .severity-badge.CRITICAL { background: rgba(255, 68, 102, 0.2); color: var(--red); }
+    .severity-badge.HIGH { background: rgba(255, 68, 102, 0.15); color: var(--red); }
+    .severity-badge.MEDIUM { background: rgba(255, 184, 0, 0.2); color: var(--yellow); }
+    .severity-badge.LOW { background: rgba(147, 51, 234, 0.2); color: var(--purple-light); }
+    .severity-badge.SAFE { background: rgba(0, 255, 136, 0.2); color: var(--neon); }
+
+    .finding-desc {
+      font-size: 14px;
+      color: var(--text2);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .finding-code {
+      background: var(--bg);
+      border: 1px solid rgba(147, 51, 234, 0.2);
+      border-radius: 6px;
+      padding: 12px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text3);
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+
+    /* Token Info */
+    .token-info-section {
+      margin: 48px 0;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 16px;
+    }
+
+    .info-item {
+      background: var(--bg2);
+      border: 1px solid rgba(147, 51, 234, 0.3);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .info-label {
+      font-size: 12px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .info-value {
+      font-size: 18px;
+      font-weight: 600;
+      font-family: var(--mono);
+    }
+
+    .info-value.warn { color: var(--yellow); }
+    .info-value.flag { color: var(--red); }
+    .info-value.ok { color: var(--neon); }
+
+    /* AI Verdict */
+    .ai-verdict-section {
+      margin: 48px 0;
+      background: var(--bg2);
+      border: 2px solid rgba(0, 255, 136, 0.3);
+      border-radius: 16px;
+      padding: 32px;
+    }
+
+    .verdict-text {
+      font-size: 16px;
+      line-height: 1.8;
+      color: var(--text);
+    }
+
+    /* Actions */
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 32px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      padding: 12px 28px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      font-size: 14px;
+      font-family: var(--sans);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .action-btn.primary {
+      background: linear-gradient(135deg, var(--neon), #00D4AA);
+      color: var(--bg);
+    }
+
+    .action-btn.secondary {
+      background: var(--bg3);
+      color: var(--text);
+      border: 1px solid rgba(147, 51, 234, 0.4);
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Features Section */
+    .features-section {
+      max-width: 1400px;
+      margin: 120px auto 80px;
+      padding: 0 24px;
+    }
+
+    .features-container {
+      text-align: center;
+    }
+
+    .features-title {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--text), var(--purple-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .features-subtitle {
+      font-size: 20px;
+      color: var(--text2);
+      margin-bottom: 64px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-top: 48px;
+    }
+
+    .feature-card {
+      background: var(--bg2);
+      border: 1px solid rgba(147, 51, 234, 0.3);
+      border-radius: 16px;
+      padding: 40px 32px;
+      transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--neon), var(--purple));
+      transform: scaleX(0);
+      transition: transform 0.3s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 16px 40px rgba(147, 51, 234, 0.2);
+      border-color: var(--purple);
+    }
+
+    .feature-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .feature-icon {
+      font-size: 48px;
+      margin-bottom: 20px;
+      display: inline-block;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .feature-card:nth-child(2) .feature-icon { animation-delay: 0.2s; }
+    .feature-card:nth-child(3) .feature-icon { animation-delay: 0.4s; }
+    .feature-card:nth-child(4) .feature-icon { animation-delay: 0.6s; }
+    .feature-card:nth-child(5) .feature-icon { animation-delay: 0.8s; }
+    .feature-card:nth-child(6) .feature-icon { animation-delay: 1s; }
+
+    .feature-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    .feature-desc {
+      font-size: 15px;
+      color: var(--text2);
+      line-height: 1.7;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--bg2);
+      border-top: 1px solid rgba(147, 51, 234, 0.2);
+      padding: 48px 24px;
+      text-align: center;
+      margin-top: 80px;
+    }
+
+    footer p {
+      color: var(--text3);
+      font-size: 14px;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 40px; }
+      .hero p { font-size: 16px; }
+      .stats-bar { flex-direction: column; gap: 24px; }
+      .input-row { flex-direction: column; }
+      .scan-btn { width: 100%; }
+      .findings-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+      .features-title { font-size: 32px; }
+      .features-subtitle { font-size: 16px; }
+      .features-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
 
-<!-- NAV -->
+<div class="glow-purple glow-1"></div>
+<div class="glow-purple glow-2"></div>
+
 <nav>
-  <a href="#" class="logo">
-    <div class="logo-icon">🔍</div>
-    Chain<span>Lens</span>
-  </a>
-  <ul class="nav-links">
-    <li><a href="#analyze">Analyze</a></li>
-    <li><a href="#features">Features</a></li>
-    <li><a href="#pricing">Pricing</a></li>
-    <li><a href="#" class="nav-cta">Connect Wallet</a></li>
-  </ul>
+  <div class="nav-content">
+    <div class="logo">
+      <span class="logo-icon">📡</span>
+      <span>RugRadar</span>
+    </div>
+    <div class="nav-links">
+      <a href="#how-it-works">How It Works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="https://t.me/rugradar" target="_blank">Telegram</a>
+      <button class="connect-wallet" onclick="connectWallet()">Connect Wallet</button>
+    </div>
+  </div>
 </nav>
 
-<!-- HERO -->
 <section class="hero">
-  <div class="hero-badge">
-    <div class="badge-dot"></div>
-    Live Risk Intelligence · 47 contracts scanned today
+  <h1>Never Get Rugged Again</h1>
+  <p>Scan Solana tokens in 3 seconds. AI-powered rug detection for pump.fun, Raydium, and all SPL tokens.</p>
+  
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-value" id="scans-count">247,392</div>
+      <div class="stat-label">Tokens Scanned</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="rugs-detected">12,847</div>
+      <div class="stat-label">Rugs Detected</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">$2.8M</div>
+      <div class="stat-label">Saved from Scams</div>
+    </div>
   </div>
-  <h1>
-    Stop Getting Rugged.<br>
-    <span class="line2">Scan Before You Ape.</span>
-  </h1>
-  <p>
-    AI-powered smart contract risk analysis for everyone. Paste any contract address or Solidity code and get a full risk report in seconds — no Solidity knowledge required.
-  </p>
 </section>
 
-<!-- STATS BAR -->
-<div class="stats-bar fade-up">
-  <div class="stat-item">
-    <div class="stat-value danger">$2.8B</div>
-    <div class="stat-label">Lost to exploits in 2023</div>
+<section class="scanner-section">
+  <div class="scanner-card">
+    <label class="input-label">Paste Token Address</label>
+    <div class="input-row">
+      <input 
+        type="text" 
+        class="address-input" 
+        id="token-address"
+        placeholder="Enter Solana token address (e.g., pump.fun mint address)"
+        spellcheck="false"
+      >
+      <button class="scan-btn" onclick="scanToken()">Scan Now</button>
+    </div>
+    
+    <div class="input-label" style="margin-top: 24px;">Try a sample:</div>
+    <div class="quick-samples">
+      <div class="sample-chip" onclick="loadSample('rug')">🔴 Confirmed Rug</div>
+      <div class="sample-chip" onclick="loadSample('honeypot')">🍯 Honeypot</div>
+      <div class="sample-chip" onclick="loadSample('safe')">✅ Safe Token</div>
+      <div class="sample-chip" onclick="loadSample('suspicious')">⚠️ Suspicious</div>
+    </div>
   </div>
-  <div class="stat-item">
-    <div class="stat-value safe">94.2%</div>
-    <div class="stat-label">Rug pulls detectable</div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-value warn">12,400+</div>
-    <div class="stat-label">Contracts analyzed</div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-value">< 8s</div>
-    <div class="stat-label">Average scan time</div>
+</section>
+
+<div class="loading-panel" id="loading-panel">
+  <div class="loading-content">
+    <div class="loading-spinner"></div>
+    <h3>Scanning Token...</h3>
+    <div class="loading-steps">
+      <div class="loading-step" id="step-1">
+        <div class="step-icon">1</div>
+        <span>Fetching on-chain data</span>
+      </div>
+      <div class="loading-step" id="step-2">
+        <div class="step-icon">2</div>
+        <span>Analyzing token metadata</span>
+      </div>
+      <div class="loading-step" id="step-3">
+        <div class="step-icon">3</div>
+        <span>Checking liquidity & holders</span>
+      </div>
+      <div class="loading-step" id="step-4">
+        <div class="step-icon">4</div>
+        <span>Scanning for rug patterns</span>
+      </div>
+      <div class="loading-step" id="step-5">
+        <div class="step-icon">5</div>
+        <span>Generating AI verdict</span>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- MAIN APP -->
-<section class="app-section" id="analyze">
-  <div class="section-label">// Smart Contract Scanner</div>
-  <div class="section-title">Analyze Any Contract</div>
-
-  <div class="input-panel">
-    <div class="panel-tabs">
-      <button class="tab-btn active" onclick="switchTab('address', this)">Contract Address</button>
-      <button class="tab-btn" onclick="switchTab('code', this)">Paste Solidity Code</button>
-    </div>
-
-    <div class="tab-content active" id="tab-address">
-      <div class="input-group">
-        <select class="chain-select" id="chain-select">
-          <option value="eth">⟠ Ethereum</option>
-          <option value="bsc">🟡 BSC</option>
-          <option value="poly">🟣 Polygon</option>
-          <option value="arb">🔵 Arbitrum</option>
-          <option value="sol">◎ Solana</option>
-          <option value="base">🔵 Base</option>
-        </select>
-        <input class="address-input" id="address-input" type="text"
-          placeholder="0x... paste contract address here" />
-        <button class="analyze-btn" id="analyze-addr-btn" onclick="runAnalysis('address')">
-          Scan Contract
-        </button>
-      </div>
-      <div class="input-hint">Try a sample contract:</div>
-      <div class="quick-samples">
-        <div class="sample-chip" onclick="loadSample('safemoon')">SafeMoon (infamous rug)</div>
-        <div class="sample-chip" onclick="loadSample('uniswap')">Uniswap V2 (safe)</div>
-        <div class="sample-chip" onclick="loadSample('squid')">Squid Game Token (honeypot)</div>
-        <div class="sample-chip" onclick="loadSample('shib')">SHIB (verified)</div>
-      </div>
-    </div>
-
-    <div class="tab-content" id="tab-code">
-      <textarea class="code-input" id="code-input"
-        placeholder="// Paste your Solidity smart contract code here...
-pragma solidity ^0.8.0;
-
-contract MyToken {
-    ...
-}"></textarea>
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div class="input-hint">Supports Solidity 0.4.x — 0.8.x</div>
-        <button class="analyze-btn" onclick="runAnalysis('code')">Analyze Code</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Loading State -->
-  <div class="loading-panel" id="loading-panel">
-    <div class="scan-animation">
-      <div class="scan-ring"></div>
-      <div class="scan-icon">🔍</div>
-    </div>
-    <div style="font-size:16px; font-weight:700; margin-bottom:8px;" id="loading-title">Scanning contract...</div>
-    <div style="font-size:13px; color:var(--text3); font-family:var(--mono); margin-bottom:32px;" id="loading-sub">
-      Fetching bytecode from chain
-    </div>
-    <div class="loading-steps" id="loading-steps">
-      <div class="loading-step active" id="step-1"><div class="step-dot"></div>Fetching bytecode & ABI</div>
-      <div class="loading-step" id="step-2"><div class="step-dot"></div>Decompiling & parsing functions</div>
-      <div class="loading-step" id="step-3"><div class="step-dot"></div>Running vulnerability checks</div>
-      <div class="loading-step" id="step-4"><div class="step-dot"></div>Analyzing tokenomics & ownership</div>
-      <div class="loading-step" id="step-5"><div class="step-dot"></div>Generating AI risk report</div>
-    </div>
-  </div>
-
-  <!-- Report Output -->
-  <div class="report-panel" id="report-panel">
-    <!-- Risk Score Header -->
-    <div class="risk-header">
-      <div class="risk-score-ring">
-        <svg viewBox="0 0 120 120">
-          <circle class="ring-bg" cx="60" cy="60" r="54"/>
-          <circle class="ring-fill" id="score-ring" cx="60" cy="60" r="54"/>
+<div class="report-panel" id="report-panel">
+  <div class="report-header">
+    <div class="contract-info" id="contract-info">—</div>
+    <h2 class="contract-name" id="contract-name">—</h2>
+    
+    <div class="risk-score-container">
+      <div class="risk-ring">
+        <svg class="ring-svg" viewBox="0 0 200 200">
+          <circle class="ring-circle" cx="100" cy="100" r="90"></circle>
+          <circle 
+            class="ring-progress" 
+            id="ring-progress"
+            cx="100" 
+            cy="100" 
+            r="90"
+            stroke-dasharray="565.48"
+            stroke-dashoffset="565.48"
+          ></circle>
         </svg>
-        <div class="risk-score-value">
-          <div class="score-num" id="score-num">—</div>
-          <div class="score-label">RISK</div>
-        </div>
-      </div>
-
-      <div class="risk-header-info">
-        <div class="contract-name" id="contract-name">—</div>
-        <div class="contract-address" id="contract-addr">—</div>
-        <div class="risk-verdict" id="risk-verdict">—</div>
-        <div class="risk-header-meta">
-          <div class="meta-item">Chain: <span id="meta-chain">—</span></div>
-          <div class="meta-item">Verified: <span id="meta-verified">—</span></div>
-          <div class="meta-item">Holders: <span id="meta-holders">—</span></div>
-          <div class="meta-item">Age: <span id="meta-age">—</span></div>
+        <div class="ring-content">
+          <div class="risk-score-number" id="risk-score">—</div>
+          <div class="risk-score-label">Risk Score</div>
         </div>
       </div>
     </div>
-
-    <!-- Key Findings -->
-    <div class="section-label" style="margin-bottom:12px;">// Key Findings</div>
-    <div class="findings-grid" id="findings-grid"></div>
-
-    <!-- Detailed Analysis -->
-    <div class="section-label" style="margin-bottom:12px;">// Detailed Analysis</div>
-    <div class="analysis-sections">
-
-      <!-- Tokenomics -->
-      <div class="analysis-card">
-        <div class="analysis-card-header">
-          <h3>📊 Tokenomics Analysis</h3>
-          <span id="token-badge" style="font-size:11px; font-family:var(--mono); color:var(--text3);">LOADED</span>
-        </div>
-        <div class="analysis-card-body">
-          <table class="token-table" id="tokenomics-table"></table>
-        </div>
-      </div>
-
-      <!-- Ownership Distribution -->
-      <div class="analysis-card">
-        <div class="analysis-card-header">
-          <h3>👥 Ownership Distribution</h3>
-          <span id="ownership-badge" style="font-size:11px; font-family:var(--mono); color:var(--text3);">TOP 10 HOLDERS</span>
-        </div>
-        <div class="analysis-card-body">
-          <div class="ownership-bars" id="ownership-bars"></div>
-        </div>
-      </div>
-
-      <!-- Function Risk Map -->
-      <div class="analysis-card">
-        <div class="analysis-card-header">
-          <h3>⚙️ Dangerous Functions Detected</h3>
-        </div>
-        <div class="analysis-card-body">
-          <div id="functions-list" style="display:flex; flex-direction:column; gap:10px;"></div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- AI Verdict -->
-    <div class="verdict-footer">
-      <h3>🤖 AI Verdict</h3>
-      <div class="verdict-text" id="verdict-text">—</div>
-      <div class="verdict-actions">
-        <button class="verdict-btn primary" onclick="downloadReport()">Download Report</button>
-        <button class="verdict-btn secondary" onclick="shareReport()">Share Analysis</button>
-        <button class="verdict-btn secondary" onclick="resetScan()">Scan Another</button>
-      </div>
-    </div>
-
+    
+    <div class="verdict-badge" id="verdict-badge">—</div>
   </div>
-</section>
 
-<!-- FEATURES -->
-<section class="features-section" id="features">
-  <div class="section-label">// Why ChainLens</div>
-  <div class="section-title fade-up">Everything You Need to<br>Stay Safe On-Chain</div>
-  <div class="features-grid">
-    <div class="feature-card fade-up">
-      <div class="feature-icon">🔎</div>
-      <h3>Rug Pull Detection</h3>
-      <p>Identifies hidden mint functions, backdoor ownership transfers, and liquidity removal vectors before they're exploited.</p>
-    </div>
-    <div class="feature-card fade-up">
-      <div class="feature-icon">🍯</div>
-      <h3>Honeypot Analysis</h3>
-      <p>Simulates buy/sell transactions to detect contracts that let you buy but not sell — one of the most common retail traps.</p>
-    </div>
-    <div class="feature-card fade-up">
-      <div class="feature-icon">📊</div>
-      <h3>Tokenomics Deep Dive</h3>
-      <p>Analyzes tax rates, wallet concentration, liquidity lock status, and supply inflation mechanisms in plain English.</p>
-    </div>
-    <div class="feature-card fade-up">
-      <div class="feature-icon">👁️</div>
-      <h3>Ownership Transparency</h3>
-      <p>Maps wallet ownership concentration, identifies team wallets, and flags abnormally concentrated supply.</p>
-    </div>
-    <div class="feature-card fade-up">
-      <div class="feature-icon">⚡</div>
-      <h3>Real-Time Alerts</h3>
-      <p>Monitor contracts you hold and receive instant alerts when ownership changes, liquidity is pulled, or suspicious transactions fire.</p>
-    </div>
-    <div class="feature-card fade-up">
-      <div class="feature-icon">🤖</div>
-      <h3>AI Risk Narratives</h3>
-      <p>No cryptic code findings. Every vulnerability is explained in plain language with actionable recommendations for retail investors.</p>
+  <div class="findings-grid" id="findings-grid"></div>
+
+  <div class="token-info-section">
+    <h3 class="section-title">📊 Token Information</h3>
+    <div class="info-grid" id="token-info-grid"></div>
+  </div>
+
+  <div class="ai-verdict-section">
+    <h3 class="section-title">🤖 AI Analysis</h3>
+    <p class="verdict-text" id="ai-verdict-text">—</p>
+  </div>
+
+  <div class="action-buttons">
+    <button class="action-btn primary" onclick="downloadReport()">Download Report</button>
+    <button class="action-btn secondary" onclick="shareReport()">Share on Twitter</button>
+    <button class="action-btn secondary" onclick="resetScan()">Scan Another</button>
+  </div>
+</div>
+
+<!-- Features Section -->
+<section class="features-section">
+  <div class="features-container">
+    <h2 class="features-title">Everything You Need to Stay Safe On-Chain</h2>
+    <p class="features-subtitle">Built for degens, by degens. Scan smarter, trade safer.</p>
+    
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3 class="feature-title">Instant Scanning</h3>
+        <p class="feature-desc">Analyze any Solana token in under 3 seconds. Get results before the pump dumps.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <h3 class="feature-title">AI-Powered Analysis</h3>
+        <p class="feature-desc">Claude AI explains complex vulnerabilities in plain English. No Rust knowledge required.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <h3 class="feature-title">Deep Rug Detection</h3>
+        <p class="feature-desc">Scans for mutable metadata, freeze authority, LP locks, holder concentration, and 20+ rug patterns.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">🍯</div>
+        <h3 class="feature-title">Honeypot Checker</h3>
+        <p class="feature-desc">Detects transfer hooks and sell restrictions. Know if you can actually exit before you buy.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3 class="feature-title">Live Holder Analysis</h3>
+        <p class="feature-desc">Real-time tracking of top wallet movements. See when whales are about to dump.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">🚀</div>
+        <h3 class="feature-title">Bonding Curve Analysis</h3>
+        <p class="feature-desc">Predicts if pump.fun tokens can graduate to Raydium. Analyzes liquidity depth, holder quality, and graduation probability.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <h3 class="feature-title">Sniper Bot Detection</h3>
+        <p class="feature-desc">Identifies known sniper wallets and predicts dumps. See who bought in the first 0.3 seconds and when they'll exit. Never catch a falling knife.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">🔔</div>
+        <h3 class="feature-title">Telegram Alerts</h3>
+        <p class="feature-desc">Get instant notifications when tokens in your watchlist show rug signals. React in seconds.</p>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- PRICING -->
-<section class="pricing-section" id="pricing">
-  <div class="section-label">// Pricing</div>
-  <div class="section-title fade-up">Protect Your Capital</div>
-  <div class="pricing-grid">
-    <div class="pricing-card fade-up">
-      <div class="pricing-tier">Degen</div>
-      <div class="pricing-price">Free</div>
-      <div class="pricing-period">forever</div>
-      <ul class="pricing-features">
-        <li>5 contract scans/day</li>
-        <li>Basic risk score</li>
-        <li>Rug pull & honeypot detection</li>
-        <li>3 saved reports</li>
-      </ul>
-      <button class="pricing-btn ghost">Get Started Free</button>
-    </div>
-    <div class="pricing-card featured fade-up">
-      <div class="pricing-tier">Alpha</div>
-      <div class="pricing-price">$29</div>
-      <div class="pricing-period">per month</div>
-      <ul class="pricing-features">
-        <li>Unlimited contract scans</li>
-        <li>Full AI analysis report</li>
-        <li>Real-time contract monitoring</li>
-        <li>Ownership & tokenomics deep dive</li>
-        <li>Wallet watchlist (10 addresses)</li>
-        <li>Priority scan queue</li>
-      </ul>
-      <button class="pricing-btn primary-btn">Start 7-Day Trial</button>
-    </div>
-    <div class="pricing-card fade-up">
-      <div class="pricing-tier">Institutional</div>
-      <div class="pricing-price">$299</div>
-      <div class="pricing-period">per month</div>
-      <ul class="pricing-features">
-        <li>Everything in Alpha</li>
-        <li>API access (10k req/mo)</li>
-        <li>Custom risk thresholds</li>
-        <li>White-label reports</li>
-        <li>Slack & Telegram integration</li>
-        <li>Dedicated support</li>
-      </ul>
-      <button class="pricing-btn ghost">Contact Sales</button>
-    </div>
-  </div>
-</section>
-
-<!-- FOOTER -->
 <footer>
-  <div class="logo" style="font-size:16px;">
-    <div class="logo-icon" style="width:24px;height:24px;font-size:12px;">🔍</div>
-    Chain<span>Lens</span>
-  </div>
-  <p>© 2025 ChainLens. Not financial advice. <a href="#">Terms</a> · <a href="#">Privacy</a> · <a href="#">Docs</a></p>
-  <p style="color:var(--text3);">Built for the next billion on-chain users.</p>
+  <p>RugRadar - Protecting Solana traders since 2026</p>
+  <p style="margin-top: 8px; color: var(--text3);">Not financial advice. Always DYOR.</p>
 </footer>
 
 <script>
-// ─── SAMPLE DATA ─────────────────────────────────────────────────────────────
+// Sample data for Solana tokens
 const SAMPLES = {
-  safemoon: {
-    address: '0x8076c74	c5e3f5852037F31Ff0093Eeb8c8ADd8D3',
-    chain: 'bsc',
-    name: 'SafeMoon (SAFEMOON)',
-    score: 87,
+  rug: {
+    address: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
+    name: 'PUMP Token',
+    symbol: 'PUMP',
+    score: 95,
     verdict: 'critical',
-    verdictLabel: '🚨 CRITICAL RISK — Extreme Danger',
-    holders: '2.4M',
-    age: '3 years',
-    verified: '✅ Yes',
-    aiVerdict: `ChainLens AI has flagged this contract as CRITICAL RISK. SafeMoon contains multiple high-severity vulnerabilities that enabled one of the largest exits in DeFi history. The contract grants the owner unrestricted ability to mint tokens, blacklist sell orders, and modify transaction fees up to 100% — effectively trapping user funds. Liquidity was not time-locked. The developer wallet held over 50% of circulating supply at launch. This contract is the textbook definition of a centralized rug pull mechanism. DO NOT INVEST.`,
+    verdictLabel: '💀 CRITICAL - Confirmed Rug',
     findings: [
-      { type: 'danger', icon: '🔓', title: 'Unlimited Owner Mint', severity: 'CRITICAL', desc: 'Owner can mint unlimited tokens at any time, permanently diluting all holders. No cap, no timelock, no governance.', code: '<span class="highlight">function _mint(address account, uint256 amount) internal virtual</span>\n// Called by: onlyOwner — no limits enforced' },
-      { type: 'danger', icon: '🚪', title: 'Backdoor Sell Blacklist', severity: 'CRITICAL', desc: 'Owner can call addToBlacklist() to prevent any address from selling tokens — a direct honeypot mechanism.', code: '<span class="highlight">function addToBlacklist(address addr) public onlyOwner</span>\nmapping(address => bool) private _isBlacklisted;' },
-      { type: 'warning', icon: '💸', title: 'Dynamic Fee Manipulation', severity: 'HIGH', desc: 'Tax fee and liquidity fee can be changed by owner at any time with no upper bound, making effective sell tax potentially 100%.', code: '<span class="highlight">function setTaxFeePercent(uint256 taxFee) external onlyOwner</span>\n// No max fee guard — can be set to 100%' },
-      { type: 'warning', icon: '🔒', title: 'Unlocked Liquidity', severity: 'HIGH', desc: 'Liquidity pool tokens were not locked in a time-lock contract. Developer could remove all liquidity at any time.', code: '// No liquidity lock mechanism found\n// LP tokens held by: <span class="highlight">0x8a... (dev wallet)</span>' },
-      { type: 'danger', icon: '📦', title: 'Supply Concentration', severity: 'HIGH', desc: 'At launch, top 3 wallets controlled 67% of circulating supply. Dev wallet received 5% treasury allocation.', code: '' },
-      { type: 'warning', icon: '⚙️', title: 'Upgradeable Proxy Risk', severity: 'MEDIUM', desc: 'Contract uses a proxy pattern that allows the implementation to be swapped, potentially changing all contract logic.', code: '<span class="highlight">function upgradeTo(address newImpl) external onlyOwner</span>' }
+      { type: 'danger', icon: '🎯', title: 'Sniper Bot Activity Detected', severity: 'CRITICAL', desc: '4 known sniper wallets control 23% of supply. These wallets have successfully rugged 187 tokens in past 30 days. Average hold time: 3.8 minutes. Current hold time: 2.1 minutes. DUMP IMMINENT.' },
+      { type: 'danger', icon: '🔓', title: 'Mutable Metadata', severity: 'CRITICAL', desc: 'Token metadata can be changed by authority. Name, symbol, and image can be modified at any time to impersonate other projects.' },
+      { type: 'danger', icon: '🏦', title: 'No Liquidity Lock', severity: 'CRITICAL', desc: 'Liquidity is not locked or burned. Developer can remove all liquidity instantly, causing price to crash to zero.' },
+      { type: 'danger', icon: '🚫', title: 'Will NOT Graduate Bonding Curve', severity: 'CRITICAL', desc: 'Token lacks sufficient organic holders and liquidity depth to reach pump.fun graduation threshold. Dev wallet owns 78% - graduation mathematically impossible without coordinated buys.' },
+      { type: 'danger', icon: '🐋', title: 'Whale Concentration', severity: 'HIGH', desc: 'Top 3 wallets control 87% of supply. Single wallet can dump and destroy price.' },
+      { type: 'danger', icon: '⚡', title: 'Freeze Authority Active', severity: 'CRITICAL', desc: 'Authority can freeze token accounts, preventing users from selling. Classic honeypot mechanism.' }
     ],
-    tokenomics: [
-      ['Total Supply', '1,000,000,000,000,000', 'warn'],
-      ['Buy Tax', '10%', 'warn'],
-      ['Sell Tax', '10% (up to 100%)', 'flag'],
-      ['Liquidity Lock', 'NOT LOCKED', 'flag'],
-      ['Mintable', 'YES — UNLIMITED', 'flag'],
-      ['Renounced Ownership', 'NO', 'flag'],
-      ['Max Wallet', 'None', 'warn'],
-      ['Contract Verified', 'Yes', 'ok'],
+    tokenInfo: [
+      { label: 'Sniper Wallets', value: '4 detected', status: 'flag' },
+      { label: 'Sniper Supply', value: '23%', status: 'flag' },
+      { label: 'Dump Probability', value: '91% (IMMINENT)', status: 'flag' },
+      { label: 'Time Since Launch', value: '2.1 mins', status: 'flag' },
+      { label: 'Supply', value: '1B', status: 'warn' },
+      { label: 'Liquidity', value: 'NOT LOCKED', status: 'flag' },
+      { label: 'Bonding Curve', value: 'Will NOT graduate', status: 'flag' },
+      { label: 'Freeze Authority', value: 'ENABLED', status: 'flag' }
     ],
-    ownership: [
-      { label: 'Dev Wallet', pct: 32, color: '#FF4466' },
-      { label: 'Team Wallets', pct: 18, color: '#FF4466' },
-      { label: 'Top Holder 3', pct: 8, color: '#FFB800' },
-      { label: 'Top Holder 4', pct: 4, color: '#FFB800' },
-      { label: 'Top Holder 5', pct: 3, color: '#8A9BAE' },
-      { label: 'Retail (rest)', pct: 35, color: '#00FF88' },
-    ],
-    functions: [
-      { name: 'setTaxFeePercent()', risk: 'high', desc: 'Owner can change tax to any value' },
-      { name: 'addToBlacklist()', risk: 'critical', desc: 'Trap any address from selling' },
-      { name: 'excludeFromFee()', risk: 'medium', desc: 'Owner wallets pay zero fees' },
-      { name: '_mint()', risk: 'critical', desc: 'Unlimited token minting' },
-      { name: 'upgradeTo()', risk: 'high', desc: 'Swaps contract implementation' },
-    ]
+    aiVerdict: 'RugRadar AI has flagged this token as CRITICAL DANGER. This is a confirmed rug pull with ALL the red flags: 4 known sniper wallets control 23% of supply and have rugged 187 tokens in the past month. Current hold time is 2.1 minutes with average dump at 3.8 minutes - dump is IMMINENT. Additionally: no liquidity lock, freeze authority enabled, mutable metadata, and extreme whale concentration. The token authority can freeze your wallet and prevent you from selling. DO NOT BUY. If you already hold this token, sell immediately before the snipers dump.'
   },
-  uniswap: {
-    address: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
-    chain: 'eth',
-    name: 'Uniswap V2 Factory',
+  honeypot: {
+    address: '5z3UqBRZdbrZx9FXG6x98qxJYqZhjTQT5YC6Zr8VnB5u',
+    name: 'MoonShot',
+    symbol: 'MOON',
+    score: 92,
+    verdict: 'critical',
+    verdictLabel: '🍯 CRITICAL - Honeypot Detected',
+    findings: [
+      { type: 'danger', icon: '🎯', title: 'Coordinated Sniper Attack', severity: 'CRITICAL', desc: '6 sniper wallets bought 31% of supply in first 0.2 seconds. Same wallets involved in 3 previous honeypots. They CAN sell (whitelisted), you CANNOT. This is a coordinated trap.' },
+      { type: 'danger', icon: '🚫', title: 'Sell Function Restricted', severity: 'CRITICAL', desc: 'Token program contains logic that prevents selling. Only 2 whitelisted wallets can sell. Everyone else is trapped.' },
+      { type: 'danger', icon: '🔒', title: 'Transfer Hook Detected', severity: 'CRITICAL', desc: 'Custom transfer logic checks if recipient is a DEX. All sell attempts are rejected. Classic honeypot pattern.' },
+      { type: 'warning', icon: '📈', title: 'Artificial Pump Activity', severity: 'HIGH', desc: '200+ coordinated buys from related wallets in 1 hour. Creating fake volume to attract victims.' },
+      { type: 'danger', icon: '💰', title: 'LP Removed 3 Times', severity: 'CRITICAL', desc: 'Liquidity pool was drained and refilled 3 times. Testing rug mechanism before final exit.' }
+    ],
+    tokenInfo: [
+      { label: 'Sniper Wallets', value: '6 (whitelisted)', status: 'flag' },
+      { label: 'Sniper Supply', value: '31%', status: 'flag' },
+      { label: 'Can Sell?', value: 'NO (only snipers)', status: 'flag' },
+      { label: 'Bonding Curve', value: 'Graduation BLOCKED', status: 'flag' },
+      { label: 'Transfer Hook', value: 'ACTIVE', status: 'flag' },
+      { label: 'LP Manipulations', value: '3 times', status: 'flag' }
+    ],
+    aiVerdict: 'This is a coordinated honeypot attack. RugRadar detected 6 sniper wallets that bought 31% of supply in the first 0.2 seconds - these same wallets have run 3 previous honeypots. The token allows buying but prevents selling through a transfer hook that rejects transactions to DEXs. Only the snipers\' whitelisted wallets can sell. The coordinated buy activity from related wallets is designed to create FOMO while retail investors get trapped. Once enough victims buy in, the 6 whitelisted snipers will dump simultaneously and disappear. DO NOT TOUCH THIS TOKEN.'
+  },
+  safe: {
+    address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+    name: 'USD Coin',
+    symbol: 'USDC',
     score: 8,
     verdict: 'low',
-    verdictLabel: '✅ LOW RISK — Audited & Safe',
-    holders: 'N/A',
-    age: '4.5 years',
-    verified: '✅ Yes',
-    aiVerdict: `ChainLens AI rates Uniswap V2 Factory as LOW RISK. This is one of the most battle-tested and audited smart contracts in all of DeFi. The contract is fully immutable — no admin keys, no upgrade mechanisms, no owner privileges. All fee parameters are governed by UNI token holders through a transparent governance process. Code has been audited by Trail of Bits, ABDK, and Consensys Diligence. Over $4B in liquidity has passed through this contract safely since March 2020. This is the gold standard of trustless smart contract design.`,
+    verdictLabel: '✅ LOW RISK - Safe Token',
     findings: [
-      { type: 'safe', icon: '✅', title: 'No Owner Privileges', severity: 'SAFE', desc: 'Contract has zero admin functions. Once deployed, no party can modify, pause, or upgrade the contract logic. Fully trustless.', code: '<span class="safe-highlight">// No onlyOwner modifier found anywhere in contract\n// Ownership renounced at deployment</span>' },
-      { type: 'safe', icon: '🔒', title: 'Immutable Logic', severity: 'SAFE', desc: 'No proxy pattern, no upgrade mechanism. The contract you see is the contract that runs forever. Cannot be changed.', code: '<span class="safe-highlight">// No proxy or delegatecall patterns detected\n// SPDX-License-Identifier: GPL-3.0</span>' },
-      { type: 'safe', icon: '🛡️', title: 'Multiple Audits Verified', severity: 'SAFE', desc: 'Audited by Trail of Bits (2020), ABDK (2020), and Consensys Diligence (2020). Zero critical vulnerabilities found.', code: '' },
-      { type: 'safe', icon: '💎', title: 'Reentrancy Protected', severity: 'SAFE', desc: 'All state-changing functions use reentrancy guards, preventing the most common DeFi attack vector.', code: '<span class="safe-highlight">uint private unlocked = 1;\nmodifier lock() { require(unlocked == 1); unlocked = 0; _; unlocked = 1; }</span>' }
+      { type: 'safe', icon: '✅', title: 'No Sniper Activity', severity: 'SAFE', desc: 'Zero known sniper wallets detected. Token launched fairly with no bot manipulation at launch. Organic holder distribution.' },
+      { type: 'safe', icon: '✅', title: 'Immutable Metadata', severity: 'SAFE', desc: 'Token metadata is frozen and cannot be changed. Name, symbol stay permanent.' },
+      { type: 'safe', icon: '🔒', title: 'No Freeze Authority', severity: 'SAFE', desc: 'Freeze authority has been revoked. No one can freeze token accounts.' },
+      { type: 'safe', icon: '🏦', title: 'Massive Liquidity', severity: 'SAFE', desc: 'Deep liquidity pools across all major DEXs. Price stable, no rug possible.' },
+      { type: 'safe', icon: '🏛️', title: 'Institutional Backing', severity: 'SAFE', desc: 'Issued by Circle, audited by multiple firms. Fully regulated stablecoin.' }
     ],
-    tokenomics: [
-      ['Protocol Fee', '0.05% (governance)', 'ok'],
-      ['LP Fee', '0.3% fixed', 'ok'],
-      ['Fee Changes', 'Governance only', 'ok'],
-      ['Upgradeable', 'NO — Immutable', 'ok'],
-      ['Ownership', 'Renounced', 'ok'],
-      ['Audits', '3 major audits', 'ok'],
-      ['Bug Bounty', 'Active ($1M max)', 'ok'],
-      ['TVL', '$1.8B+', 'ok'],
+    tokenInfo: [
+      { label: 'Sniper Wallets', value: '0 detected', status: 'ok' },
+      { label: 'Launch Type', value: 'Fair Launch', status: 'ok' },
+      { label: 'Issuer', value: 'Circle', status: 'ok' },
+      { label: 'Liquidity', value: '$2.4B', status: 'ok' },
+      { label: 'Status', value: 'Graduated (Raydium)', status: 'ok' },
+      { label: 'Freeze Authority', value: 'Revoked', status: 'ok' },
+      { label: 'Metadata', value: 'Immutable', status: 'ok' }
     ],
-    ownership: [
-      { label: 'Protocol (immutable)', pct: 100, color: '#00FF88' },
-    ],
-    functions: [
-      { name: 'createPair()', risk: 'safe', desc: 'Creates new liquidity pairs permissionlessly' },
-      { name: 'setFeeTo()', risk: 'low', desc: 'Governed by UNI token holders only' },
-      { name: 'lock modifier', risk: 'safe', desc: 'Reentrancy protection on all swaps' },
-    ]
+    aiVerdict: 'RugRadar AI rates USDC as LOW RISK with zero sniper activity detected. This is a fully regulated stablecoin issued by Circle with deep liquidity and institutional backing. Token launched fairly with no bot manipulation. All dangerous authorities have been properly configured or revoked. The token has been battle-tested with billions in value and has never had security issues. Safe for trading and holding.'
   },
-  squid: {
-    address: '0x87230146E138d3F296a9a77e497A2A83012e9Bc5',
-    chain: 'bsc',
-    name: 'Squid Game Token (SQUID)',
-    score: 98,
-    verdict: 'critical',
-    verdictLabel: '💀 CRITICAL — Confirmed Honeypot',
-    holders: '43,000',
-    age: '6 days (before rug)',
-    verified: '✅ Yes',
-    aiVerdict: `This contract is a confirmed honeypot. ChainLens AI detects that the sell function is permanently disabled for all non-whitelisted addresses. The transfer function contains a hidden check that reverts all sell orders unless the caller is in the owner's whitelist — which only contained 2 wallet addresses. This is the exact mechanism used in the infamous November 2021 SQUID rug pull that stole $3.38 million from 43,000 investors in minutes. The contract is a masterclass in deceptive tokenomics — high buy volume was manufactured to create FOMO while sell was silently disabled.`,
+  suspicious: {
+    address: '4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R',
+    name: 'PumpFun Clone',
+    symbol: 'PCLONE',
+    score: 68,
+    verdict: 'high',
+    verdictLabel: '⚠️ HIGH RISK - Suspicious Activity',
     findings: [
-      { type: 'danger', icon: '💀', title: 'Confirmed Honeypot', severity: 'CRITICAL', desc: 'Transfer function reverts all sell transactions unless caller is whitelisted. Buying is enabled for everyone, selling is impossible for retail.', code: '<span class="highlight">require(isWhitelisted[sender] || isWhitelisted[recipient],\n  "Not authorized to transfer");</span>' },
-      { type: 'danger', icon: '🚫', title: 'Hidden Anti-Sell Logic', severity: 'CRITICAL', desc: 'The sell restriction is buried inside the _transfer() function, making it invisible to casual code review. Requires deep parsing to detect.', code: '<span class="highlight">// 47 lines deep inside _transfer()\nif (isSellingToPool(recipient)) {\n  require(canSell[from], "Cannot sell"); // Always reverts\n}</span>' },
-      { type: 'danger', icon: '📈', title: 'Artificial Price Pump', severity: 'HIGH', desc: 'Dev wallets executed 200+ coordinated buy orders in the first 48 hours to create artificial price momentum and FOMO.', code: '' },
-      { type: 'warning', icon: '⏰', title: 'Time-Delayed Rug', severity: 'HIGH', desc: 'Liquidity was removed exactly 5 days after launch, suggesting pre-planned exit from inception.', code: '' }
+      { type: 'warning', icon: '🎯', title: 'Suspected Sniper Activity', severity: 'HIGH', desc: '2 wallets bought within 0.5 seconds of launch and control 18% supply. Not confirmed snipers in database yet, but behavior pattern matches. Monitor closely for dumps.' },
+      { type: 'warning', icon: '🐋', title: 'Unusual Holder Distribution', severity: 'HIGH', desc: 'Top 5 wallets hold 63% of supply and all were created in same hour. Likely controlled by same entity.' },
+      { type: 'warning', icon: '🚀', title: 'Low Graduation Probability', severity: 'MEDIUM', desc: 'Only 25% chance to graduate bonding curve based on holder distribution and liquidity metrics. Needs 200+ unique holders and $85K liquidity for Raydium migration.' },
+      { type: 'warning', icon: '⚡', title: 'Mint Authority Not Revoked', severity: 'MEDIUM', desc: 'Authority can still mint unlimited tokens. No supply cap enforced on-chain.' },
+      { type: 'safe', icon: '🔓', title: 'No Freeze Authority', severity: 'SAFE', desc: 'Freeze authority was revoked. Users can always transfer tokens.' }
     ],
-    tokenomics: [
-      ['Buy Tax', '2%', 'warn'],
-      ['Sell Tax', 'INFINITE — Sells disabled', 'flag'],
-      ['Whitelist', '2 addresses can sell', 'flag'],
-      ['Liquidity', 'REMOVED (rug executed)', 'flag'],
-      ['Honeypot Simulation', 'CONFIRMED FAIL', 'flag'],
-      ['Owner', 'Anonymous', 'flag'],
+    tokenInfo: [
+      { label: 'Sniper Wallets', value: '2 suspected', status: 'warn' },
+      { label: 'Sniper Supply', value: '18%', status: 'warn' },
+      { label: 'Dump Risk', value: 'MEDIUM (45%)', status: 'warn' },
+      { label: 'Top 5 Holders', value: '63%', status: 'warn' },
+      { label: 'Graduation Chance', value: '25% (unlikely)', status: 'warn' },
+      { label: 'Liquidity', value: '$12K', status: 'warn' },
+      { label: 'Freeze Authority', value: 'Revoked', status: 'ok' }
     ],
-    ownership: [
-      { label: 'Dev/Rug Wallets', pct: 78, color: '#FF4466' },
-      { label: 'Trapped Retail', pct: 22, color: '#4A5A6A' },
-    ],
-    functions: [
-      { name: 'setWhitelist()', risk: 'critical', desc: 'Only whitelisted addresses can sell' },
-      { name: '_transfer() hook', risk: 'critical', desc: 'Hidden sell block inside transfer' },
-      { name: 'removeLiquidity()', risk: 'critical', desc: 'Owner drained all LP in one tx' },
-    ]
-  },
-  shib: {
-    address: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE',
-    chain: 'eth',
-    name: 'Shiba Inu (SHIB)',
-    score: 28,
-    verdict: 'medium',
-    verdictLabel: '⚠️ MEDIUM RISK — Speculative Asset',
-    holders: '1.3M',
-    age: '3.5 years',
-    verified: '✅ Yes',
-    aiVerdict: `ChainLens AI rates SHIB as MEDIUM RISK. The contract itself is relatively safe — no malicious mint functions, no hidden backdoors. However, SHIB carries significant risk due to extreme supply concentration and reliance on a small team for ongoing development. 50% of total supply was burned to Vitalik Buterin's address (effectively locked), but the remaining supply is heavily concentrated. The "ShibArmy" community narrative drives price action more than fundamentals. Contract is not upgradeable. Main risk: speculative asset with no intrinsic utility — community-driven projects can lose momentum rapidly.`,
-    findings: [
-      { type: 'safe', icon: '✅', title: 'No Hidden Mint Functions', severity: 'SAFE', desc: 'Total supply is fixed at 1 quadrillion tokens. No owner can mint additional tokens. Supply is permanently capped.', code: '<span class="safe-highlight">// Total supply: 1,000,000,000,000,000 SHIB\n// No _mint() function accessible post-deploy</span>' },
-      { type: 'warning', icon: '🐋', title: 'Whale Concentration Risk', severity: 'MEDIUM', desc: 'Top 10 non-burned wallets hold 18% of circulating supply. A coordinated dump from major holders could crater price significantly.', code: '' },
-      { type: 'safe', icon: '🔒', title: '50% Supply Burned', severity: 'SAFE', desc: '500 trillion SHIB burned to Vitalik\'s address (0xAb5801a7...). These tokens are effectively locked and removed from circulation.', code: '<span class="safe-highlight">// 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B\n// Balance: 410T SHIB (donated 90T to India COVID relief)</span>' },
-      { type: 'warning', icon: '⚡', title: 'Community-Driven Risk', severity: 'MEDIUM', desc: 'No intrinsic utility beyond speculative trading. Price is driven almost entirely by social sentiment and "ShibArmy" narrative.', code: '' }
-    ],
-    tokenomics: [
-      ['Total Supply', '1 Quadrillion (fixed)', 'ok'],
-      ['Burned Supply', '~41% to Vitalik', 'ok'],
-      ['Buy Tax', '0%', 'ok'],
-      ['Sell Tax', '0%', 'ok'],
-      ['Mintable', 'NO', 'ok'],
-      ['Upgradeable', 'NO', 'ok'],
-      ['Ownership', 'Renounced', 'ok'],
-      ['Whale Risk', 'MEDIUM', 'warn'],
-    ],
-    ownership: [
-      { label: 'Burned (locked)', pct: 41, color: '#4A5A6A' },
-      { label: 'Whales (top 5)', pct: 14, color: '#FFB800' },
-      { label: 'Mid holders', pct: 18, color: '#8A9BAE' },
-      { label: 'Retail community', pct: 27, color: '#00FF88' },
-    ],
-    functions: [
-      { name: 'transfer()', risk: 'safe', desc: 'Standard ERC-20 transfer, no hooks' },
-      { name: 'approve()', risk: 'safe', desc: 'Standard ERC-20 approval' },
-      { name: 'burn()', risk: 'low', desc: 'Anyone can burn their own tokens' },
-    ]
+    aiVerdict: 'This token has multiple red flags including 2 suspected sniper wallets that bought in the first 0.5 seconds and control 18% supply. While not confirmed in our sniper database yet, the behavior pattern is suspicious. The concentration of supply in wallets created at the same time suggests insider control. Mint authority is still active, allowing unlimited inflation. Low liquidity means price can be easily manipulated. Only 25% chance to graduate bonding curve. If you buy, monitor the 2 suspected sniper wallets closely and be ready to exit if they start dumping. Proceed with extreme caution and only invest what you can afford to lose completely.'
   }
 };
 
-// ─── TAB SWITCHING ─────────────────────────────────────────────────────────────
-function switchTab(tab, btn) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('tab-' + tab).classList.add('active');
-}
+// Loading animation
+function animateLoadingSteps(callback) {
+  const steps = ['step-1', 'step-2', 'step-3', 'step-4', 'step-5'];
+  let current = 0;
 
-// ─── LOAD SAMPLE ──────────────────────────────────────────────────────────────
-function loadSample(key) {
-  const s = SAMPLES[key];
-  document.getElementById('address-input').value = s.address;
-  document.getElementById('chain-select').value = s.chain;
-  runAnalysis('address', key);
-}
-
-// ─── SIMULATE LOADING STEPS ───────────────────────────────────────────────────
-function animateLoadingSteps(cb) {
-  const steps = ['step-1','step-2','step-3','step-4','step-5'];
-  const msgs = [
-    'Fetching bytecode from chain…',
-    'Decompiling contract functions…',
-    'Running 47 vulnerability checks…',
-    'Simulating buy/sell transactions…',
-    'Generating AI risk narrative…'
-  ];
-  let i = 0;
-
-  document.getElementById('loading-steps').querySelectorAll('.loading-step')
-    .forEach(s => { s.classList.remove('active','done'); });
-
-  const next = () => {
-    if (i > 0) {
-      document.getElementById(steps[i-1]).classList.remove('active');
-      document.getElementById(steps[i-1]).classList.add('done');
-      document.getElementById(steps[i-1]).innerHTML =
-        '<div class="step-dot"></div>✓ ' + document.getElementById(steps[i-1]).textContent.trim();
+  function next() {
+    if (current > 0) {
+      document.getElementById(steps[current - 1]).classList.remove('active');
+      document.getElementById(steps[current - 1]).classList.add('done');
     }
-    if (i < steps.length) {
-      document.getElementById(steps[i]).classList.add('active');
-      document.getElementById('loading-sub').textContent = msgs[i];
-      i++;
-      setTimeout(next, 900 + Math.random() * 400);
+    if (current < steps.length) {
+      document.getElementById(steps[current]).classList.add('active');
+      current++;
+      setTimeout(next, 800);
     } else {
-      setTimeout(cb, 400);
+      setTimeout(callback, 500);
     }
-  };
+  }
+  
   next();
 }
 
-// ─── RUN ANALYSIS ─────────────────────────────────────────────────────────────
-function runAnalysis(type, sampleKey) {
-  const loadingPanel = document.getElementById('loading-panel');
-  const reportPanel = document.getElementById('report-panel');
+function scanToken() {
+  const address = document.getElementById('token-address').value.trim();
+  if (!address) {
+    alert('Please enter a token address');
+    return;
+  }
 
   // Hide report, show loading
-  reportPanel.classList.remove('visible');
-  loadingPanel.classList.add('visible');
+  document.getElementById('report-panel').classList.remove('visible');
+  document.getElementById('loading-panel').classList.add('visible');
+  document.getElementById('loading-panel').scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-  // Scroll to loading
-  loadingPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // Reset loading steps
+  ['step-1', 'step-2', 'step-3', 'step-4', 'step-5'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('active', 'done');
+  });
 
-  // Pick data
-  let dataKey = sampleKey;
-  if (!dataKey) {
-    const addr = document.getElementById('address-input').value.toLowerCase();
-    if (addr.includes('safemoon') || addr.includes('8076c74')) dataKey = 'safemoon';
-    else if (addr.includes('uniswap') || addr.includes('5c69b')) dataKey = 'uniswap';
-    else if (addr.includes('squid') || addr.includes('87230')) dataKey = 'squid';
-    else if (addr.includes('shib') || addr.includes('95ad6')) dataKey = 'shib';
-    else {
-      // Random result for unknown
-      const keys = Object.keys(SAMPLES);
-      dataKey = keys[Math.floor(Math.random() * keys.length)];
-    }
-  }
+  // Determine which sample to show (in real app, this would be API call)
+  let sampleKey = 'rug'; // default
+  const addr = address.toLowerCase();
+  if (addr.includes('honeypot') || addr.includes('5z3u')) sampleKey = 'honeypot';
+  else if (addr.includes('safe') || addr.includes('usdc') || addr.includes('epjf')) sampleKey = 'safe';
+  else if (addr.includes('suspicious') || addr.includes('4k3d')) sampleKey = 'suspicious';
 
-  // Animate loading steps then fetch/render
-  animateLoadingSteps(async () => {
-    try {
-      // Get current values from inputs
-      const addressInput = document.getElementById('address-input').value.trim();
-      const chainSelect = document.getElementById('chain-select').value;
-
-      // Try backend API first
-      const response = await fetch('https://chainlens-backend-production-656c.up.railway.app/api/contracts/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          address: addressInput, 
-          chain: chainSelect 
-        })
-      });
-
-      let reportData;
-      
-      if (response.ok) {
-        const data = await response.json();
-        reportData = data.report;
-        console.log('✅ Using backend data');
-      } else {
-        console.log('⚠️ Backend error, using sample data');
-        reportData = SAMPLES[dataKey];
-      }
-
-      loadingPanel.classList.remove('visible');
-      renderReport(reportData);
-      reportPanel.classList.add('visible');
-      reportPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-    } catch (error) {
-      console.log('⚠️ Backend unavailable, using sample data:', error.message);
-      loadingPanel.classList.remove('visible');
-      renderReport(SAMPLES[dataKey]);
-      reportPanel.classList.add('visible');
-      reportPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+  animateLoadingSteps(() => {
+    document.getElementById('loading-panel').classList.remove('visible');
+    renderReport(SAMPLES[sampleKey]);
+    document.getElementById('report-panel').classList.add('visible');
+    document.getElementById('report-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 }
- animateLoadingSteps(async () => {
-  const loadingPanelInner = document.getElementById('loading-panel');
-  const reportPanelInner = document.getElementById('report-panel');
+
+function loadSample(key) {
+  const samples = {
+    rug: SAMPLES.rug,
+    honeypot: SAMPLES.honeypot,
+    safe: SAMPLES.safe,
+    suspicious: SAMPLES.suspicious
+  };
   
-  try {
-    const addressInput = document.getElementById('address-input').value.trim();
-    const chainSelect = document.getElementById('chain-select').value;
+  document.getElementById('token-address').value = samples[key].address;
+  scanToken();
+}
 
-    console.log('📤 Analyzing:', addressInput, chainSelect);
-
-    const response = await fetch('https://chainlens-backend-production-656c.up.railway.app/api/contracts/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        address: addressInput || '0x0000000000000000000000000000000000000000', 
-        chain: chainSelect || 'eth'
-      })
-    });
-
-    let reportData;
-    
-    if (response.ok) {
-      const data = await response.json();
-      reportData = data.report;
-      console.log('✅ Backend success');
-    } else {
-      console.warn('⚠️ Backend error:', response.status);
-      reportData = SAMPLES[dataKey] || SAMPLES.safemoon;
-    }
-
-    loadingPanelInner.classList.remove('visible');
-    renderReport(reportData);
-    reportPanelInner.classList.add('visible');
-    reportPanelInner.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-  } catch (error) {
-    console.error('❌ Error:', error);
-    loadingPanelInner.classList.remove('visible');
-    renderReport(SAMPLES[dataKey] || SAMPLES.safemoon);
-    reportPanelInner.classList.add('visible');
-    reportPanelInner.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-});
-
-// ─── RENDER REPORT ────────────────────────────────────────────────────────────
 function renderReport(data) {
-  // Score ring
+  // Contract info
+  document.getElementById('contract-info').textContent = `${data.address.substring(0, 8)}...${data.address.substring(36)}`;
+  document.getElementById('contract-name').textContent = `${data.name} (${data.symbol})`;
+
+  // Risk score ring
+  const ring = document.getElementById('ring-progress');
   const score = data.score;
-  const circumference = 339.29;
+  const circumference = 565.48;
   const offset = circumference - (score / 100) * circumference;
-  const ring = document.getElementById('score-ring');
-  ring.style.strokeDashoffset = circumference; // reset
   
-  const scoreColor = score >= 70 ? '#FF4466' : score >= 40 ? '#FFB800' : '#00FF88';
-  ring.style.stroke = scoreColor;
+  ring.style.strokeDashoffset = offset;
+  ring.className = 'ring-progress ' + data.verdict;
 
-  setTimeout(() => {
-    ring.style.strokeDashoffset = offset;
-  }, 100);
+  document.getElementById('risk-score').textContent = score;
+  document.getElementById('risk-score').className = 'risk-score-number ' + data.verdict;
 
-  document.getElementById('score-num').textContent = score;
-  document.getElementById('score-num').style.color = scoreColor;
-
-  // Header
-  document.getElementById('contract-name').textContent = data.name;
-  document.getElementById('contract-addr').textContent = data.address;
-
-  const verdictEl = document.getElementById('risk-verdict');
-  verdictEl.textContent = data.verdictLabel;
-  verdictEl.className = `risk-verdict ${data.verdict}`;
-
-  const chain = document.getElementById('chain-select').value;
-  const chainNames = { eth:'Ethereum', bsc:'BSC', poly:'Polygon', arb:'Arbitrum', sol:'Solana', base:'Base' };
-  document.getElementById('meta-chain').textContent = chainNames[chain] || 'Ethereum';
-  document.getElementById('meta-verified').textContent = data.verified;
-  document.getElementById('meta-holders').textContent = data.holders;
-  document.getElementById('meta-age').textContent = data.age;
+  const badge = document.getElementById('verdict-badge');
+  badge.textContent = data.verdictLabel;
+  badge.className = 'verdict-badge ' + data.verdict;
 
   // Findings
-  const grid = document.getElementById('findings-grid');
-  grid.innerHTML = '';
-  data.findings.forEach(f => {
-    const codeBlock = f.code ? `<div class="finding-code">${f.code}</div>` : '';
-    grid.innerHTML += `
-      <div class="finding-card ${f.type}">
-        <div class="finding-header">
-          <div class="finding-icon ${f.type}">${f.icon}</div>
-          <div class="finding-title">${f.title}</div>
-          <div class="finding-severity ${f.type}">${f.severity}</div>
-        </div>
-        <div class="finding-desc">${f.desc}</div>
-        ${codeBlock}
+  const findingsGrid = document.getElementById('findings-grid');
+  findingsGrid.innerHTML = data.findings.map(f => `
+    <div class="finding-card ${f.type}">
+      <div class="finding-header">
+        <span class="finding-icon">${f.icon}</span>
+        <span class="finding-title">${f.title}</span>
+        <span class="severity-badge ${f.severity}">${f.severity}</span>
       </div>
-    `;
-  });
-
-  // Tokenomics
-  const table = document.getElementById('tokenomics-table');
-  table.innerHTML = data.tokenomics.map(([label, value, cls]) => `
-    <tr>
-      <td>${label}</td>
-      <td class="${cls}">${value}</td>
-    </tr>
-  `).join('');
-
-  // Ownership bars
-  const bars = document.getElementById('ownership-bars');
-  bars.innerHTML = data.ownership.map(o => `
-    <div class="ownership-bar-item">
-      <div class="ownership-label">${o.label}</div>
-      <div class="ownership-bar-track">
-        <div class="ownership-bar-fill" style="background:${o.color}; width:0%"
-          data-width="${o.pct}%"></div>
-      </div>
-      <div class="ownership-pct">${o.pct}%</div>
+      <p class="finding-desc">${f.desc}</p>
     </div>
   `).join('');
 
-  // Animate bars after render
-  setTimeout(() => {
-    bars.querySelectorAll('.ownership-bar-fill').forEach(el => {
-      el.style.width = el.dataset.width;
-    });
-  }, 200);
-
-  // Functions
-  const fnList = document.getElementById('functions-list');
-  const riskColors = { critical: 'var(--red)', high: '#FF7744', medium: 'var(--yellow)', low: 'var(--text3)', safe: 'var(--green)' };
-  fnList.innerHTML = data.functions.map(fn => `
-    <div style="display:flex; align-items:center; gap:16px; padding:12px 16px; background:var(--bg2); border-radius:8px; border:1px solid var(--border);">
-      <code style="font-family:var(--mono); font-size:12px; color:${riskColors[fn.risk]}; min-width:220px;">${fn.name}</code>
-      <div style="font-size:11px; font-family:var(--mono); font-weight:700; color:${riskColors[fn.risk]}; text-transform:uppercase; min-width:70px;">${fn.risk}</div>
-      <div style="font-size:13px; color:var(--text2);">${fn.desc}</div>
+  // Token info
+  const infoGrid = document.getElementById('token-info-grid');
+  infoGrid.innerHTML = data.tokenInfo.map(info => `
+    <div class="info-item">
+      <div class="info-label">${info.label}</div>
+      <div class="info-value ${info.status}">${info.value}</div>
     </div>
   `).join('');
 
-  // AI Verdict
-  document.getElementById('verdict-text').textContent = data.aiVerdict;
+  // AI verdict
+  document.getElementById('ai-verdict-text').textContent = data.aiVerdict;
 }
 
-// ─── UTILS ────────────────────────────────────────────────────────────────────
-function resetScan() {
-  document.getElementById('report-panel').classList.remove('visible');
-  document.getElementById('address-input').value = '';
-  document.querySelector('.input-panel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+function connectWallet() {
+  alert('Wallet connection coming soon! Follow us on Twitter @RugRadar for updates.');
 }
 
 function downloadReport() {
-  alert('📄 Report download — connect wallet to save PDF reports to your account.');
+  alert('Download feature coming soon!');
 }
 
 function shareReport() {
-  const url = window.location.href;
-  navigator.clipboard.writeText(url).then(() => {
-    alert('🔗 Link copied to clipboard!');
-  });
+  const text = encodeURIComponent('Just scanned a token with @RugRadar - never getting rugged again! 📡');
+  window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
 }
 
-// ─── SCROLL ANIMATIONS ────────────────────────────────────────────────────────
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach((e, i) => {
-    if (e.isIntersecting) {
-      setTimeout(() => e.target.classList.add('visible'), i * 80);
+function resetScan() {
+  document.getElementById('token-address').value = '';
+  document.getElementById('report-panel').classList.remove('visible');
+  document.getElementById('token-address').focus();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Animate stats on load
+function animateStats() {
+  const scans = document.getElementById('scans-count');
+  const rugs = document.getElementById('rugs-detected');
+  
+  let scanCount = 0;
+  let rugCount = 0;
+  const scanTarget = 247392;
+  const rugTarget = 12847;
+  const duration = 2000;
+  const steps = 60;
+  const scanStep = scanTarget / steps;
+  const rugStep = rugTarget / steps;
+  
+  const interval = setInterval(() => {
+    scanCount += scanStep;
+    rugCount += rugStep;
+    
+    if (scanCount >= scanTarget) {
+      scanCount = scanTarget;
+      rugCount = rugTarget;
+      clearInterval(interval);
     }
-  });
-}, { threshold: 0.1 });
+    
+    scans.textContent = Math.floor(scanCount).toLocaleString();
+    rugs.textContent = Math.floor(rugCount).toLocaleString();
+  }, duration / steps);
+}
 
-document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
-
-// ─── ENTER KEY ────────────────────────────────────────────────────────────────
-document.getElementById('address-input').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') runAnalysis('address');
-});
+window.addEventListener('load', animateStats);
 </script>
+
 </body>
 </html>
